@@ -1,13 +1,10 @@
-﻿using System;
-using System.Buffers;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using EventStormingSample.Commands;
 using EventStormingSample.Domains;
 using EventStormingSample.Infrastructure;
 using EventStormingSample.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 
 namespace EventStormingSample.Controllers
@@ -58,8 +55,18 @@ namespace EventStormingSample.Controllers
 
             var contactResult = CustomerContact.Create(request.Mobile,
                 request.Email);
+            if (contactResult.Status == OpStatus.Error)
+            {
+                return BadRequest(new
+                {
+                    CustomerId = string.Empty,
+                    contactResult.Errors
+                });
+            }
 
-            var customer = new Customer(nameResult.Value, addressResult.Value);
+            var customer = new Customer(nameResult.Value, 
+                addressResult.Value, 
+                contactResult.Value);
             var commandResult = await _mediator.Send(new CreateCustomerCommand(customer));
             
             _logger.LogInformation($"Successfully created a customer {commandResult.Value}");
@@ -69,45 +76,6 @@ namespace EventStormingSample.Controllers
                 CustomerId = commandResult.Value,
                 Errors = new string[]{}
             });
-        }
-    }
-
-    public class CustomerContact
-    {
-        public static OpResult<CustomerContact> Create(string mobile,
-            string email)
-        {
-            return new OpResult<CustomerContact>(new CustomerContact());
-        }
-    }
-
-    public class Customer
-    {
-        public CustomerName CustomerName { get; }
-        public CustomerAddress CustomerAddress { get; }
-
-        public Customer(CustomerName customerName, CustomerAddress customerAddress)
-        {
-            CustomerName = customerName;
-            CustomerAddress = customerAddress;
-        }
-    }
-
-    public class CreateCustomerCommand : IRequest<OpResult<Guid>>
-    {
-        public Customer Customer { get; }
-
-        public CreateCustomerCommand(Customer customer)
-        {
-            Customer = customer;
-        }
-    }
-    
-    public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, OpResult<Guid>>
-    {
-        public async Task<OpResult<Guid>> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
-        {
-            return new OpResult<Guid>(Guid.NewGuid());
         }
     }
 }
