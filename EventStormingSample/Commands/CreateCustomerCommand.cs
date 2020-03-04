@@ -5,7 +5,7 @@ using MediatR;
 
 namespace EventStormingSample.Commands
 {
-    public class CreateCustomerCommand : IRequest<OpResult<Guid>>
+    public class CreateCustomerCommand : IRequest<OpResult<Id<Customer>>>
     {
         public Customer Customer { get; }
 

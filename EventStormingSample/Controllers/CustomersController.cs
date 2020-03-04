@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using EventStormingSample.Commands;
 using EventStormingSample.Domains;
 using EventStormingSample.Infrastructure;
@@ -64,9 +65,11 @@ namespace EventStormingSample.Controllers
                 });
             }
 
-            var customer = new Customer(nameResult.Value, 
+            var customer = new Customer(new Id<Customer>(Guid.NewGuid()), 
+                nameResult.Value, 
                 addressResult.Value, 
                 contactResult.Value);
+            
             var commandResult = await _mediator.Send(new CreateCustomerCommand(customer));
             
             _logger.LogInformation($"Successfully created a customer {commandResult.Value}");
