@@ -1,15 +1,16 @@
 using EventStormingSample.Domains;
+using EventStormingSample.Infrastructure;
 using MediatR;
 
 namespace EventStormingSample.Commands
 {
-    public class UpdateIdentityCommand : IRequest
+    public class UpdateIdentityCommand : IRequest<OpResult>
     {
-        public Customer Customer { get; }
+        public CustomerIdentity Identity { get; }
 
-        public UpdateIdentityCommand(Customer customer)
+        public UpdateIdentityCommand(CustomerIdentity identity)
         {
-            Customer = customer;
+            Identity = identity;
         }
     }
 }

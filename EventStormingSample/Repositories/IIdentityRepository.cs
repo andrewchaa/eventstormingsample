@@ -1,10 +1,12 @@
 using System.Threading.Tasks;
 using EventStormingSample.Domains;
+using EventStormingSample.Infrastructure;
 
 namespace EventStormingSample.Repositories
 {
     public interface IIdentityRepository
     {
-        Task<bool> IdentityExists(Customer customer);
+        Task<OpResult<CustomerIdentity>> GetIdentity(Customer customer);
+        Task Update(CustomerIdentity identity);
     }
 }

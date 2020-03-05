@@ -8,7 +8,7 @@ using MediatR;
 namespace EventStormingSample.Handlers
 {
     public class CheckCustomerIdentityCommandHandler : IRequestHandler<CheckCustomerIdentityCommand,
-        OpResult<Unit>>
+        OpResult>
     {
         private readonly IIdentityRepository _identityRepository;
         private readonly Mediator _mediator;
@@ -20,20 +20,23 @@ namespace EventStormingSample.Handlers
             _mediator = mediator;
         }
         
-        public async Task<OpResult<Unit>> Handle(CheckCustomerIdentityCommand command, 
+        public async Task<OpResult> Handle(CheckCustomerIdentityCommand command, 
             CancellationToken cancellationToken)
         {
-            var identityExists = await _identityRepository.IdentityExists(command.Customer);
-            if (identityExists)
-            {
-                await _mediator.Send(new UpdateIdentityCommand(command.Customer));
-            }
-            else
+            var identityResult = await _identityRepository.GetIdentity(command.Customer);
+            if (identityResult.Status == OpStatus.NotFound)
             {
                 await _mediator.Send(new CreateIdentityCommand(command.Customer));
             }
+            else
+            {
+                var identity = identityResult.Value;
+                identity.AddCustomer(command.Customer);
+                
+                await _mediator.Send(new UpdateIdentityCommand(identity));
+            }
             
-            return new OpResult<Unit>(Unit.Value);
+            return new OpResult();
         }
     }
 }

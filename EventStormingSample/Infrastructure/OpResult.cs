@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Generic;
 using EventStormingSample.Controllers;
 
@@ -20,7 +21,16 @@ namespace EventStormingSample.Infrastructure
             Status = OpStatus.Success;
             Value = value;
         }
-        
-        
+    }
+
+    public class OpResult
+    {
+        public OpStatus Status { get; }
+        public IList<string> Errors { get; }
+
+        public OpResult()
+        {
+            Status = OpStatus.Success;
+        }
     }
 }
