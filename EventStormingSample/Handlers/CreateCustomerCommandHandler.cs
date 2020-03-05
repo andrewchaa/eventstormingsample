@@ -1,7 +1,7 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using EventStormingSample.Commands;
+using EventStormingSample.DomainEvents;
 using EventStormingSample.Domains;
 using EventStormingSample.Infrastructure;
 using EventStormingSample.Repositories;
@@ -24,19 +24,9 @@ namespace EventStormingSample.Handlers
         public async Task<OpResult<Id<Customer>>> Handle(CreateCustomerCommand command, CancellationToken cancellationToken)
         {
             await _repository.Create(command.Customer);
-            await _mediator.Send(new CustomerCreated(command.Customer));
+            await _mediator.Publish(new CustomerCreated(command.Customer));
             
             return new OpResult<Id<Customer>>(command.Customer.CustomerId);
-        }
-    }
-
-    public class CustomerCreated : INotification
-    {
-        public Customer Customer { get; }
-
-        public CustomerCreated(Customer customer)
-        {
-            Customer = customer;
         }
     }
 }
