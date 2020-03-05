@@ -23,6 +23,12 @@ namespace EventStormingSample.Handlers
         
         public async Task<OpResult<Id<Customer>>> Handle(CreateCustomerCommand command, CancellationToken cancellationToken)
         {
+            var customerResult = await _repository.GetCustomer(command.Customer.CustomerId);
+            if (customerResult.Status != OpStatus.NotFound)
+            {
+                return new OpResult<Id<Customer>>(customerResult.Value.CustomerId);
+            }
+            
             await _repository.Create(command.Customer);
             await _mediator.Publish(new CustomerCreated(command.Customer));
             

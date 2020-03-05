@@ -7,5 +7,6 @@ namespace EventStormingSample.Repositories
     public interface ICustomerReposiory
     {
         Task<Id<Customer>> Create(Customer customer);
+        Task<OpResult<Customer>> GetCustomer(Id<Customer> customerId);
     }
 }
